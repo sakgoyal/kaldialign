@@ -1,6 +1,5 @@
-import math
-import random
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
+from collections.abc import Iterable, Sequence
+from typing import Any, TypeVar
 
 import _kaldialign
 
@@ -9,7 +8,7 @@ Symbol = TypeVar("Symbol")
 
 def edit_distance(
     ref: Iterable[Symbol], hyp: Iterable[Symbol], sclite_mode: bool = False
-) -> Dict[str, Union[int, float]]:
+) -> dict[str, int | float]:
     """
     Compute the edit distance between sequences ``ref`` and ``hyp``.
     Both sequences can be strings or lists of strings or ints.
@@ -28,8 +27,8 @@ def edit_distance(
     int2sym = dict(enumerate(sorted(set(ref) | set(hyp))))
     sym2int = {v: k for k, v in int2sym.items()}
 
-    refi: List[int] = []
-    hypi: List[int] = []
+    refi: list[int] = []
+    hypi: list[int] = []
     for sym in ref:
         refi.append(sym2int[sym])
 
@@ -53,7 +52,7 @@ def align(
     hyp: Iterable[Symbol],
     eps_symbol: Symbol,
     sclite_mode: bool = False,
-) -> List[Tuple[Symbol, Symbol]]:
+) -> list[tuple[Symbol, Symbol]]:
     """
     Compute the alignment between sequences ``ref`` and ``hyp``.
     Both sequences can be strings or lists of strings or ints.
@@ -70,8 +69,8 @@ def align(
     int2sym = dict(enumerate(sorted(set(ref) | set(hyp) | {eps_symbol})))
     sym2int = {v: k for k, v in int2sym.items()}
 
-    ai: List[int] = []
-    bi: List[int] = []
+    ai: list[int] = []
+    bi: list[int] = []
 
     for sym in ref:
         ai.append(sym2int[sym])
@@ -80,7 +79,7 @@ def align(
         bi.append(sym2int[sym])
 
     eps_int = sym2int[eps_symbol]
-    alignment: List[Tuple[int, int]] = _kaldialign.align(ai, bi, eps_int, sclite_mode)
+    alignment: list[tuple[int, int]] = _kaldialign.align(ai, bi, eps_int, sclite_mode)
 
     ali = []
     for idx in range(len(alignment)):
@@ -92,10 +91,10 @@ def align(
 def bootstrap_wer_ci(
     refs: Sequence[Sequence[Symbol]],
     hyps: Sequence[Sequence[Symbol]],
-    hyps2: Optional[Sequence[Sequence[Symbol]]] = None,
+    hyps2: Sequence[Sequence[Symbol]] | None = None,
     replications: int = 10000,
     seed: int = 0,
-) -> Dict:
+) -> dict[str, Any]:
     """
     Compute a boostrapping of WER to extract the 95% confidence interval (CI)
     using the bootstrap method of Bisani and Ney [1].
@@ -163,7 +162,7 @@ def bootstrap_wer_ci(
     }
 
 
-def _build_results(mean: float, interval: float) -> Dict[str, float]:
+def _build_results(mean: float, interval: float) -> dict[str, float]:
     return {
         "wer": mean,
         "ci95": interval,
@@ -176,13 +175,13 @@ def _convert_to_int(
     ref: Sequence[Sequence[Symbol]],
     hyp: Sequence[Sequence[Symbol]],
     hyp2: Sequence[Sequence[Symbol]] = None,
-) -> Tuple[List[List[Symbol]], ...]:
+) -> tuple[list[list[Symbol]], ...]:
     sources = [ref, hyp]
     if hyp2 is not None:
         sources.append(hyp2)
 
     symbols = sorted(
-        set(symbol for source in sources for seq in source for symbol in seq)
+        {symbol for source in sources for seq in source for symbol in seq}
     )
     int2sym = dict(enumerate(symbols))
     sym2int = {v: k for k, v in int2sym.items()}

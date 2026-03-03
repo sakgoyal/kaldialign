@@ -183,4 +183,3 @@ def test_bootstrap_wer_ci_2system():
     assert s["ci95max"] == approx(0.397)
 
     assert ans["p_s2_improv_over_s1"] == 1.0
-
